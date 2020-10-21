@@ -3,7 +3,7 @@ package ru.ifmo.crypto.skiplist;
 /**
  * Interface for Skip List
  *
- * @author Daniil Boger (sagolbah@gmail.com)
+ * @author Daniil Boger (Sagolbah)
  */
 public interface SkipList<T> {
     boolean find(T key);

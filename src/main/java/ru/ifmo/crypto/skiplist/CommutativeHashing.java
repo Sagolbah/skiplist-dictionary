@@ -4,6 +4,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
+/**
+ * Wrapper for commutative version of SHA-256 hash function
+ */
 public final class CommutativeHashing {
     private static MessageDigest sha256;
 
@@ -22,8 +25,15 @@ public final class CommutativeHashing {
         return res;
     }
 
+    /**
+     * Calculates SHA-256. This version is commutative.
+     * Implementation: SHA256(min(s1, s2), max(s1, s2))
+     *
+     * @param s1 first block
+     * @param s2 second block
+     * @return byte array representing commutative SHA-256
+     */
     public static byte[] SHA256(final byte[] s1, final byte[] s2) {
-        // SHA256(min(s1, s2) || max(s1, s2))
         int res = Arrays.compare(s1, s2);
         if (res > 0) {
             return sha256.digest(concat(s2, s1));

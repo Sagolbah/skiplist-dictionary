@@ -6,16 +6,29 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+/**
+ * Draft implementation for {@link SkipList} interface of {@link Integer} elements
+ *
+ * @author Daniil Boger (Sagolbah)
+ */
 public class IntSkipList implements SkipList<Integer> {
     private final Random rng = new Random();
     private static final byte[] NIL = new byte[]{};
     private List<Node> layers;
 
+    /**
+     * Creates empty {@link IntSkipList}
+     */
     public IntSkipList() {
         layers = new ArrayList<>();
         layers.add(makeInfinityPair());
     }
 
+    /**
+     * Creates {@link IntSkipList} with given values
+     *
+     * @param source list of initial values
+     */
     public IntSkipList(final List<Integer> source) {
         this();
         build(source);
@@ -68,6 +81,13 @@ public class IntSkipList implements SkipList<Integer> {
         return beginning.right.getData() != Integer.MAX_VALUE;
     }
 
+    /**
+     * Searches key in {@link IntSkipList}
+     * WARNING: Do not use it in production - this is for functionality tests.
+     *
+     * @param key key for searching
+     * @return true is key is in skip list, false otherwise
+     */
     @Override
     public boolean find(Integer key) {
         Node cur = layers.get(layers.size() - 1);
@@ -82,6 +102,12 @@ public class IntSkipList implements SkipList<Integer> {
         }
     }
 
+    /**
+     * Inserts key in {@link IntSkipList}
+     * TO BE IMPLEMENTED: Efficient hash recalculation
+     *
+     * @param elem element for inserting
+     */
     @Override
     public void insert(Integer elem) {
         // NOTE: Currently we assume that our skip list stores unique items.
@@ -118,6 +144,12 @@ public class IntSkipList implements SkipList<Integer> {
         return rng.nextBoolean() ? cur.getRight() : null;
     }
 
+    /**
+     * Removes key in {@link IntSkipList}. If key is not in the skip list, nothing happens.
+     * TO BE IMPLEMENTED: Efficient hash recalculation
+     *
+     * @param elem element for deleting
+     */
     @Override
     public void delete(Integer elem) {
         if (!find(elem)) {
@@ -137,6 +169,12 @@ public class IntSkipList implements SkipList<Integer> {
         }
     }
 
+    /**
+     * Creates {@link Proof} for given key. If there is no such key, null is returned.
+     *
+     * @param key key for proof generation
+     * @return {@link Proof} for given key
+     */
     public Proof makeProof(final int key) {
         List<Node> pList = new ArrayList<>();
         Node cur = layers.get(layers.size() - 1);
@@ -151,6 +189,9 @@ public class IntSkipList implements SkipList<Integer> {
             }
             cur = cur.getDown();
             pList.add(cur);
+        }
+        if (cur.getData() != key) {
+            return null;
         }
         Collections.reverse(pList);
         List<byte[]> qList = new ArrayList<>();
@@ -184,6 +225,11 @@ public class IntSkipList implements SkipList<Integer> {
         return new Proof(qList);
     }
 
+    /**
+     * Creates most up-to-date confirmation of {@link IntSkipList}
+     *
+     * @return {@link Confirmation} of given list
+     */
     public Confirmation getConfirmation() {
         return new Confirmation(calcHash(layers.get(layers.size() - 1)));
     }
@@ -219,7 +265,7 @@ public class IntSkipList implements SkipList<Integer> {
         private final int data;
         private Node right = null;
         private Node down = null;
-        private boolean isPlateau = true;
+        private boolean isPlateau = true;  // v is Plateau <=> there is no such element k that down(k) = v
         private byte[] hash = new byte[]{};
 
         public byte[] getHash() {

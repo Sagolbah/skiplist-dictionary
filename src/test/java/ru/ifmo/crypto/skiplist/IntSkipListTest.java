@@ -11,12 +11,14 @@ import java.util.*;
 import static org.junit.Assert.*;
 
 /**
- * Unit test for simple App.
+ * Test suite for IntSkipList
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class IntSkipListTest {
     private IntSkipList list;
     private final Random rng = new Random();
+
+    // BASIC FUNCTIONALITY SECTION
 
     @Test
     public void test01_empty() {
@@ -182,6 +184,22 @@ public class IntSkipListTest {
             Proof pr = list.makeProof(i);
             assertEquals(ValidationResult.CORRECT, validator.validate(pr, conf));
         }
+    }
+
+    @Test
+    public void test12_fakeProof() {
+        list = new IntSkipList();
+        list.insert(5);
+        list.insert(2);
+        list.insert(3);
+        SkipListValidator validator = new SkipListValidator();
+        Proof pr = list.makeProof(5);
+        list = new IntSkipList();
+        list.insert(666);
+        list.insert(1337);
+        list.insert(1349);
+        Confirmation conf= list.getConfirmation();
+        assertEquals(ValidationResult.WRONG, validator.validate(pr, conf));
     }
 
 }

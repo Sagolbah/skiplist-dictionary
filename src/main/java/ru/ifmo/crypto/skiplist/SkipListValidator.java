@@ -3,7 +3,20 @@ package ru.ifmo.crypto.skiplist;
 import java.util.Arrays;
 import java.util.List;
 
+/**
+ * Class for {@link Proof} validating
+ *
+ * @author Daniil Boger (Sagolbah)
+ */
 public class SkipListValidator implements Validator {
+    /**
+     * Validates given {@link Proof}
+     *
+     * @param proof given proof
+     * @param conf  {@link Confirmation} of skip list
+     * @return {@link ValidationResult} instance. CORRECT if proof is correct, OUTDATED if proof is outdated,
+     * WRONG otherwise
+     */
     @Override
     public ValidationResult validate(Proof proof, Confirmation conf) {
         List<byte[]> seq = proof.getSequence();

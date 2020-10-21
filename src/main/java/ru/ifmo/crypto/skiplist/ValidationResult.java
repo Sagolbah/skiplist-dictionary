@@ -2,6 +2,6 @@ package ru.ifmo.crypto.skiplist;
 
 public enum ValidationResult {
     CORRECT,
-    OUTDATED,
+    OUTDATED,  // For outdated queries and proofs
     WRONG
 }

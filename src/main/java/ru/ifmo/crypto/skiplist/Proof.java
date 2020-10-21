@@ -3,6 +3,11 @@ package ru.ifmo.crypto.skiplist;
 import java.util.Calendar;
 import java.util.List;
 
+/**
+ * Wrapper for skip list proofs
+ *
+ * @author Daniil Boger (Sagolbah)
+ */
 public class Proof {
     private final Calendar timestamp;
     private final List<byte[]> sequence;
