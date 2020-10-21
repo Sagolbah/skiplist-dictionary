@@ -70,6 +70,7 @@ public class IntSkipListTest {
         assertTrue(list.find(3));
         assertTrue(list.find(5));
         assertFalse(list.find(4));
+        list.makeProof(5);
     }
 
     @Test
@@ -90,6 +91,7 @@ public class IntSkipListTest {
                 assertFalse(list.find(i));
             }
         }
+
     }
 
     @Test
@@ -126,6 +128,60 @@ public class IntSkipListTest {
             }
         }
         System.out.println("Total find() queries done: " + queries);
+    }
+
+    // CRYPTO SECTION
+
+    @Test
+    public void test09_commutativeSha() {
+        byte[] a1 = new byte[]{1, 2, 3, 4};
+        byte[] a2 = new byte[]{5, 6, 7};
+        byte[] a3 = new byte[]{8, 9};
+        byte[] p1 = CommutativeHashing.SHA256(a1, a2);
+        byte[] p2 = CommutativeHashing.SHA256(a2, a1);
+        byte[] p3 = CommutativeHashing.SHA256(p2, a3);
+        byte[] p4 = CommutativeHashing.SHA256(p1, a3);
+        assertArrayEquals(p1, p2);
+        assertArrayEquals(p3, p4);
+    }
+
+    @Test
+    public void test10_commutativeShaEmpty() {
+        byte[] a1 = new byte[]{};
+        byte[] a2 = new byte[]{5, 6, 7};
+        byte[] p1 = CommutativeHashing.SHA256(a1, a2);
+        byte[] p2 = CommutativeHashing.SHA256(a2, a1);
+        assertArrayEquals(p1, p2);
+    }
+
+    @Test
+    public void test10_confirmInv() {
+        list = new IntSkipList();
+        list.insert(5);
+        list.insert(2);
+        list.insert(3);
+        Confirmation conf = list.getConfirmation();
+        Proof pr = list.makeProof(5);
+        SkipListValidator validator = new SkipListValidator();
+        assertEquals(ValidationResult.CORRECT, validator.validate(pr, conf));
+    }
+
+    @Test
+    public void test11_hardConfirmation() {
+        list = new IntSkipList();
+        Set<Integer> arg = new HashSet<>();
+        for (int i = 1; i <= 1000; i++) {
+            if (rng.nextBoolean()) {
+                arg.add(i);
+                list.insert(i);
+            }
+        }
+        SkipListValidator validator = new SkipListValidator();
+        Confirmation conf = list.getConfirmation();
+        for (Integer i : arg) {
+            Proof pr = list.makeProof(i);
+            assertEquals(ValidationResult.CORRECT, validator.validate(pr, conf));
+        }
     }
 
 }
