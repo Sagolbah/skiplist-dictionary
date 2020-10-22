@@ -106,8 +106,7 @@ public class IntSkipList implements SkipList<Integer> {
     }
 
     /**
-     * Inserts key in {@link IntSkipList}
-     * TO BE IMPLEMENTED: Efficient hash recalculation
+     * Inserts key in {@link IntSkipList} and rehashes skip list
      *
      * @param elem element for inserting
      */
