@@ -1,10 +1,7 @@
 package ru.ifmo.crypto.skiplist;
 
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 /**
  * Draft implementation for {@link SkipList} interface of {@link Integer} elements
@@ -20,6 +17,11 @@ public class IntSkipList implements SkipList<Integer> {
      * Creates empty {@link IntSkipList}
      */
     public IntSkipList() {
+        init();
+        createHashes(layers.get(0));
+    }
+
+    private void init() {
         layers = new ArrayList<>();
         layers.add(makeInfinityPair());
     }
@@ -30,7 +32,7 @@ public class IntSkipList implements SkipList<Integer> {
      * @param source list of initial values
      */
     public IntSkipList(final List<Integer> source) {
-        this();
+        init();
         build(source);
     }
 
@@ -62,6 +64,7 @@ public class IntSkipList implements SkipList<Integer> {
             }
             lastLayer = layers.get(layers.size() - 1);
         }
+        createHashes(lastLayer);
     }
 
     private void insertToBottom(final int key) {
@@ -115,25 +118,46 @@ public class IntSkipList implements SkipList<Integer> {
             return;
         }
         Node lastLayer = layers.get(layers.size() - 1);
-        insertImpl(lastLayer, elem);
+        List<Node> backtrack = new ArrayList<>();
+        insertImpl(lastLayer, elem, backtrack);
         if (isLayerNonEmpty(lastLayer)) {
             Node newLayer = makeInfinityPair();
             lastLayer.setPlateau(false);
             lastLayer.getRight().getRight().setPlateau(false);
             newLayer.setDown(lastLayer);
             newLayer.right.setDown(lastLayer.getRight().getRight());
+            // I'm sorry for this duplicate. Will fix soon.
+            for (int i = backtrack.size() - 1; i >= 0; i--) {
+                Node rec = backtrack.get(i);
+                if (rec.getRight() != null) {
+                    recalcHash(rec.getRight());
+                }
+                recalcHash(rec);
+            }
+            recalcHash(newLayer);
             layers.add(newLayer);
+        } else {
+            for (int i = backtrack.size() - 1; i >= 0; i--) {
+                Node rec = backtrack.get(i);
+                if (rec.getRight() != null) {
+                    recalcHash(rec.getRight());
+                }
+                recalcHash(rec);
+            }
         }
     }
 
-    private Node insertImpl(Node cur, int key) {
+
+    private Node insertImpl(Node cur, int key, List<Node> backtrack) {
+        backtrack.add(cur);
         while (cur.getRight().getData() < key) {
             cur = cur.right;
+            backtrack.add(cur);
         }
         if (cur.getDown() == null) {
             cur.setRight(new Node(key, cur.getRight(), null));
         } else {
-            Node res = insertImpl(cur.getDown(), key);
+            Node res = insertImpl(cur.getDown(), key, backtrack);
             if (res != null) {
                 cur.setRight(new Node(key, cur.getRight(), res));
                 res.setPlateau(false);
@@ -201,7 +225,7 @@ public class IntSkipList implements SkipList<Integer> {
             qList.add(cur_w.getHash());
         } else {
             if (cur_w.getRight() == null) {
-                qList.add(new byte[]{});
+                qList.add(NIL);
             } else {
                 qList.add(intToBytes(cur_w.getData()));
             }
@@ -225,24 +249,46 @@ public class IntSkipList implements SkipList<Integer> {
         return new Proof(qList);
     }
 
+    private void recalcHash(final Node v) {
+        if (v.getRight() == null) {
+            v.setHash(NIL);
+            return;
+        }
+        if (v.getDown() == null) {
+            if (v.getRight().isPlateau()) {
+                v.setHash(CommutativeHashing.SHA256(intToBytes(v.getData()), v.getRight().getHash()));
+            } else {
+                byte[] newBytes = (v.getRight().getRight() == null) ? NIL : intToBytes(v.getRight().getData());
+                v.setHash(CommutativeHashing.SHA256(intToBytes(v.getData()), newBytes));
+            }
+        } else {
+            if (!v.getRight().isPlateau()) {
+                v.setHash(v.getDown().getHash());
+            } else {
+                v.setHash(CommutativeHashing.SHA256(v.getDown().getHash(), v.getRight().getHash()));
+            }
+        }
+    }
+
     /**
      * Creates most up-to-date confirmation of {@link IntSkipList}
      *
      * @return {@link Confirmation} of given list
      */
     public Confirmation getConfirmation() {
-        return new Confirmation(calcHash(layers.get(layers.size() - 1)));
+        //return new Confirmation(createHashes(layers.get(layers.size() - 1)));
+        return new Confirmation(layers.get(layers.size() - 1).getHash());
     }
 
-    private byte[] calcHash(Node v) {
+    private byte[] createHashes(Node v) {
         Node nxt = v.getRight();
         Node dwn = v.getDown();
         if (v.getRight() == null) {
-            return new byte[]{};
+            return NIL;
         }
         if (dwn == null) {
             if (nxt.isPlateau()) {
-                v.setHash(CommutativeHashing.SHA256(intToBytes(v.getData()), calcHash(nxt)));
+                v.setHash(CommutativeHashing.SHA256(intToBytes(v.getData()), createHashes(nxt)));
             } else {
                 byte[] newBytes = (nxt.getRight() == null) ? NIL : intToBytes(nxt.getData());
                 v.setHash(CommutativeHashing.SHA256(intToBytes(v.getData()), newBytes));
@@ -250,9 +296,9 @@ public class IntSkipList implements SkipList<Integer> {
             return v.getHash();
         }
         if (nxt.isPlateau()) {
-            v.setHash(CommutativeHashing.SHA256(calcHash(dwn), calcHash(nxt)));
+            v.setHash(CommutativeHashing.SHA256(createHashes(dwn), createHashes(nxt)));
         } else {
-            v.setHash(calcHash(dwn));
+            v.setHash(createHashes(dwn));
         }
         return v.getHash();
     }
@@ -266,7 +312,7 @@ public class IntSkipList implements SkipList<Integer> {
         private Node right = null;
         private Node down = null;
         private boolean isPlateau = true;  // v is Plateau <=> there is no such element k that down(k) = v
-        private byte[] hash = new byte[]{};
+        private byte[] hash = NIL;
 
         public byte[] getHash() {
             return hash;

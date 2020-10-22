@@ -111,7 +111,7 @@ public class IntSkipListTest {
         list = new IntSkipList();
         Set<Integer> correct = new HashSet<>();
         int queries = 0;
-        for (int i = 0; i < 100000; i++) {
+        for (int i = 0; i < 20000; i++) {
             int arg = rng.nextInt(Integer.MAX_VALUE);
             int op = rng.nextInt(3);
             switch (op) {
@@ -157,7 +157,7 @@ public class IntSkipListTest {
     }
 
     @Test
-    public void test10_confirmInv() {
+    public void test11_confirmInv() {
         list = new IntSkipList();
         list.insert(5);
         list.insert(2);
@@ -169,10 +169,10 @@ public class IntSkipListTest {
     }
 
     @Test
-    public void test11_hardConfirmation() {
+    public void test12_hardConfirmation() {
         list = new IntSkipList();
         Set<Integer> arg = new HashSet<>();
-        for (int i = 1; i <= 1000; i++) {
+        for (int i = 1; i <= 3000; i++) {
             if (rng.nextBoolean()) {
                 arg.add(i);
                 list.insert(i);
@@ -187,7 +187,7 @@ public class IntSkipListTest {
     }
 
     @Test
-    public void test12_fakeProof() {
+    public void test13_fakeProof() {
         list = new IntSkipList();
         list.insert(5);
         list.insert(2);
@@ -198,7 +198,25 @@ public class IntSkipListTest {
         list.insert(666);
         list.insert(1337);
         list.insert(1349);
-        Confirmation conf= list.getConfirmation();
+        Confirmation conf = list.getConfirmation();
+        assertEquals(ValidationResult.WRONG, validator.validate(pr, conf));
+    }
+
+    @Test
+    public void test14_hashingInsertions() {
+        list = new IntSkipList();
+        list.insert(5);
+        list.insert(2);
+        list.insert(3);
+        SkipListValidator validator = new SkipListValidator();
+        Proof pr = list.makeProof(5);
+        Confirmation conf = list.getConfirmation();
+        assertEquals(ValidationResult.CORRECT, validator.validate(pr, conf));
+        list.insert(4);
+        conf = list.getConfirmation();
+        Proof pr2 = list.makeProof(4);
+        assertEquals(ValidationResult.CORRECT, validator.validate(pr2, conf));
+        // TODO: Change to OUTDATED
         assertEquals(ValidationResult.WRONG, validator.validate(pr, conf));
     }
 
