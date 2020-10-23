@@ -223,4 +223,68 @@ public class IntSkipListTest {
         assertEquals(ValidationResult.WRONG, validator.validate(pr, conf));
     }
 
+    @Test
+    public void test15_hashingDeletions() {
+        list = new IntSkipList();
+        list.insert(666);
+        list.insert(19);
+        list.insert(28);
+        SkipListValidator validator = new SkipListValidator();
+        Proof pr = list.makeProof(28);
+        Confirmation conf = list.getConfirmation();
+        assertEquals(ValidationResult.CORRECT, validator.validate(pr, conf));
+        list.delete(666);
+        conf = list.getConfirmation();
+        Proof pr2 = list.makeProof(19);
+        assertEquals(ValidationResult.CORRECT, validator.validate(pr2, conf));
+        // TODO: Change to OUTDATED
+        assertEquals(ValidationResult.WRONG, validator.validate(pr, conf));
+    }
+
+
+    @Test
+    public void test16_allHashingOperations() {
+        list = new IntSkipList();
+        Set<Integer> correct = new HashSet<>();
+        SkipListValidator validator = new SkipListValidator();
+        Proof pr;
+        Confirmation conf = list.getConfirmation();
+        for (int i = 0; i < 10000; i++) {
+            int op = rng.nextInt(4);
+            switch (op) {
+                case 0:
+                    if (correct.isEmpty()) {
+                        continue;
+                    }
+                    int arg = getRandomElement(correct);
+                    pr = list.makeProof(arg);
+                    assertEquals(ValidationResult.CORRECT, validator.validate(pr, conf));
+                    break;
+                case 1:
+                case 2:
+                    int newElem = rng.nextInt(Integer.MAX_VALUE);
+                    list.insert(newElem);
+                    correct.add(newElem);
+                    pr = list.makeProof(newElem);
+                    conf = list.getConfirmation();
+                    assertEquals(ValidationResult.CORRECT, validator.validate(pr, conf));
+                    break;
+                case 3:
+                    if (correct.isEmpty()) {
+                        continue;
+                    }
+                    int removedElem = getRandomElement(correct);
+                    list.delete(removedElem);
+                    correct.remove(removedElem);
+                    conf = list.getConfirmation();
+                    break;
+            }
+        }
+    }
+
+    private <T> T getRandomElement(final Set<T> s) {
+        return s.stream().skip(rng.nextInt(s.size())).findFirst().get();
+    }
+
+
 }

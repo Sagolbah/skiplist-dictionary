@@ -112,7 +112,6 @@ public class IntSkipList implements SkipList<Integer> {
      */
     @Override
     public void insert(Integer elem) {
-        // NOTE: Currently we assume that our skip list stores unique items.
         if (find(elem)) {
             return;
         }
@@ -176,16 +175,27 @@ public class IntSkipList implements SkipList<Integer> {
             return;
         }
         Node cur = layers.get(layers.size() - 1);
+        Deque<Node> backtrack = new ArrayDeque<>();
         while (true) {
+            backtrack.push(cur);
             while (cur.getRight().getData() < elem) {
                 cur = cur.right;
+                backtrack.push(cur);
             }
             if (cur.down == null) {
                 // Deleting cur.right
                 cur.setRight(cur.getRight().getRight());
+                recalcHash(cur);
                 break;
             }
             cur = cur.down;
+        }
+        while (!backtrack.isEmpty()) {
+            Node nextNode = backtrack.pop();
+            if (nextNode.getRight().getData() == elem) {
+                nextNode.setRight(nextNode.getRight().getRight());
+            }
+            recalcHash(nextNode);
         }
     }
 
@@ -227,7 +237,7 @@ public class IntSkipList implements SkipList<Integer> {
             }
         }
         qList.add(intToBytes(cur.getData()));
-        for (int i = 1; i < pList.size() - 1; i++) {
+        for (int i = 1; i < pList.size(); i++) {
             Node cur_v = pList.get(i);
             cur_w = cur_v.getRight();
             if (cur_w.isPlateau()) {

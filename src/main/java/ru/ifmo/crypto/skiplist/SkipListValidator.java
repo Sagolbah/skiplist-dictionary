@@ -24,7 +24,7 @@ public class SkipListValidator implements Validator {
         for (int i = 2; i < seq.size(); i++) {
             cur = CommutativeHashing.SHA256(cur, seq.get(i));
         }
-        cur = CommutativeHashing.SHA256(cur, new byte[]{});
+        // cur = CommutativeHashing.SHA256(cur, new byte[]{});
         return Arrays.equals(cur, conf.getHash()) ? ValidationResult.CORRECT : ValidationResult.WRONG;
     }
 }
