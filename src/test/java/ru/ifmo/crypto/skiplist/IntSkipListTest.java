@@ -124,8 +124,11 @@ public class IntSkipListTest {
                     correct.add(arg);
                     break;
                 case 2:
-                    list.delete(arg);
-                    correct.remove(arg);
+                    if (correct.isEmpty()) {
+                        continue;
+                    }
+                    list.delete(correct.iterator().next());
+                    correct.remove(correct.iterator().next());
                     break;
             }
         }

@@ -125,24 +125,21 @@ public class IntSkipList implements SkipList<Integer> {
             lastLayer.getRight().getRight().setPlateau(false);
             newLayer.setDown(lastLayer);
             newLayer.right.setDown(lastLayer.getRight().getRight());
-            // I'm sorry for this duplicate. Will fix soon.
-            for (int i = backtrack.size() - 1; i >= 0; i--) {
-                Node rec = backtrack.get(i);
-                if (rec.getRight() != null) {
-                    recalcHash(rec.getRight());
-                }
-                recalcHash(rec);
-            }
+            doBacktracking(backtrack);
             recalcHash(newLayer);
             layers.add(newLayer);
         } else {
-            for (int i = backtrack.size() - 1; i >= 0; i--) {
-                Node rec = backtrack.get(i);
-                if (rec.getRight() != null) {
-                    recalcHash(rec.getRight());
-                }
-                recalcHash(rec);
+            doBacktracking(backtrack);
+        }
+    }
+
+    private void doBacktracking(List<Node> backtrack) {
+        for (int i = backtrack.size() - 1; i >= 0; i--) {
+            Node rec = backtrack.get(i);
+            if (rec.getRight() != null) {
+                recalcHash(rec.getRight());
             }
+            recalcHash(rec);
         }
     }
 
