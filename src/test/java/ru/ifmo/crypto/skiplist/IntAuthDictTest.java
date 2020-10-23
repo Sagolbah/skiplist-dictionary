@@ -1,7 +1,5 @@
 package ru.ifmo.crypto.skiplist;
 
-import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.FixMethodOrder;
 import org.junit.Test;
 import org.junit.runners.MethodSorters;
@@ -14,28 +12,28 @@ import static org.junit.Assert.*;
  * Test suite for IntSkipList
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
-public class IntSkipListTest {
-    private IntSkipList list;
+public class IntAuthDictTest {
+    private IntAuthDict list;
     private final Random rng = new Random();
 
-    // BASIC FUNCTIONALITY SECTION
+    // Functionality section (no cryptography tests)
 
     @Test
     public void test01_empty() {
-        list = new IntSkipList();
+        list = new IntAuthDict();
         assertFalse(list.find(666));
     }
 
     @Test
     public void test02_single() {
-        list = new IntSkipList(List.of(5));
+        list = new IntAuthDict(List.of(5));
         assertTrue(list.find(5));
         assertFalse(list.find(666));
     }
 
     @Test
     public void test03_multiple() {
-        list = new IntSkipList(List.of(16, 5, 2, 8));
+        list = new IntAuthDict(List.of(16, 5, 2, 8));
         assertFalse(list.find(0));
         assertFalse(list.find(7));
         assertFalse(list.find(1000));
@@ -52,7 +50,7 @@ public class IntSkipListTest {
                 arg.add(i);
             }
         }
-        list = new IntSkipList(new ArrayList<>(arg));
+        list = new IntAuthDict(new ArrayList<>(arg));
         for (int i = 1; i <= 10000; i++) {
             if (arg.contains(i)) {
                 assertTrue(list.find(i));
@@ -64,7 +62,7 @@ public class IntSkipListTest {
 
     @Test
     public void test05_basicInsertion() {
-        list = new IntSkipList();
+        list = new IntAuthDict();
         list.insert(2);
         list.insert(3);
         list.insert(5);
@@ -78,7 +76,7 @@ public class IntSkipListTest {
     @Test
     public void test06_randomizedInsertion() {
         Set<Integer> arg = new HashSet<>();
-        list = new IntSkipList(List.of(1));
+        list = new IntAuthDict(List.of(1));
         arg.add(1);
         for (int i = 2; i <= 10000; i++) {
             if (rng.nextBoolean()) {
@@ -98,7 +96,7 @@ public class IntSkipListTest {
 
     @Test
     public void test07_basicDeletion() {
-        list = new IntSkipList();
+        list = new IntAuthDict();
         list.insert(5);
         list.insert(2);
         list.insert(3);
@@ -108,7 +106,7 @@ public class IntSkipListTest {
 
     @Test
     public void test08_allOperations() {
-        list = new IntSkipList();
+        list = new IntAuthDict();
         Set<Integer> correct = new HashSet<>();
         int queries = 0;
         for (int i = 0; i < 20000; i++) {
@@ -135,7 +133,7 @@ public class IntSkipListTest {
         System.out.println("Total find() queries done: " + queries);
     }
 
-    // CRYPTO SECTION
+    // Cryptography section
 
     @Test
     public void test09_commutativeSha() {
@@ -161,7 +159,7 @@ public class IntSkipListTest {
 
     @Test
     public void test11_confirmInv() {
-        list = new IntSkipList();
+        list = new IntAuthDict();
         list.insert(5);
         list.insert(2);
         list.insert(3);
@@ -173,7 +171,7 @@ public class IntSkipListTest {
 
     @Test
     public void test12_hardConfirmation() {
-        list = new IntSkipList();
+        list = new IntAuthDict();
         Set<Integer> arg = new HashSet<>();
         for (int i = 1; i <= 3000; i++) {
             if (rng.nextBoolean()) {
@@ -191,13 +189,13 @@ public class IntSkipListTest {
 
     @Test
     public void test13_fakeProof() {
-        list = new IntSkipList();
+        list = new IntAuthDict();
         list.insert(5);
         list.insert(2);
         list.insert(3);
         SkipListValidator validator = new SkipListValidator();
         Proof pr = list.makeProof(5);
-        list = new IntSkipList();
+        list = new IntAuthDict();
         list.insert(5);
         list.insert(1337);
         list.insert(1349);
@@ -207,7 +205,7 @@ public class IntSkipListTest {
 
     @Test
     public void test14_hashingInsertions() {
-        list = new IntSkipList();
+        list = new IntAuthDict();
         list.insert(5);
         list.insert(2);
         list.insert(3);
@@ -224,7 +222,7 @@ public class IntSkipListTest {
 
     @Test
     public void test15_hashingDeletions() {
-        list = new IntSkipList();
+        list = new IntAuthDict();
         list.insert(666);
         list.insert(19);
         list.insert(28);
@@ -242,7 +240,7 @@ public class IntSkipListTest {
 
     @Test
     public void test16_allHashingOperations() {
-        list = new IntSkipList();
+        list = new IntAuthDict();
         Set<Integer> correct = new HashSet<>();
         SkipListValidator validator = new SkipListValidator();
         Proof pr;
@@ -282,7 +280,7 @@ public class IntSkipListTest {
 
     @Test
     public void test17_emptyNonexist() {
-        list = new IntSkipList();
+        list = new IntAuthDict();
         SkipListValidator validator = new SkipListValidator();
         Proof pr = list.makeProof(1);
         Confirmation conf = list.getConfirmation();
@@ -292,7 +290,7 @@ public class IntSkipListTest {
 
     @Test
     public void test18_simpleNonExist() {
-        list = new IntSkipList();
+        list = new IntAuthDict();
         list.insert(5);
         list.insert(2);
         list.insert(3);

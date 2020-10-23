@@ -4,42 +4,41 @@ import java.nio.ByteBuffer;
 import java.util.*;
 
 /**
- * Draft implementation for {@link SkipList} interface of {@link Integer} elements
+ * Implementation for {@link AuthDict} interface of {@link Integer} elements
  *
  * @author Daniil Boger (Sagolbah)
  */
-public class IntSkipList implements SkipList<Integer> {
+public class IntAuthDict implements AuthDict<Integer> {
     private final Random rng = new Random();
     private static final byte[] NIL = new byte[]{};
     private long lastChangeTimestamp = 0;
-    private List<Node> layers;
+    private Node root;
 
     /**
-     * Creates empty {@link IntSkipList}
+     * Creates empty {@link IntAuthDict}
      */
-    public IntSkipList() {
+    public IntAuthDict() {
         init();
-        createHashes(layers.get(0));
+        createHashes(root);
     }
 
     private void init() {
-        layers = new ArrayList<>();
-        layers.add(makeInfinityPair());
+        root = makeInfinityPair();
     }
 
     /**
-     * Creates {@link IntSkipList} with given values
+     * Creates {@link IntAuthDict} with given values
      *
      * @param source list of initial values
      */
-    public IntSkipList(final List<Integer> source) {
+    public IntAuthDict(final List<Integer> source) {
         init();
         build(source);
     }
 
     private void build(final List<Integer> source) {
         source.forEach(this::insertToBottom);
-        Node lastLayer = layers.get(layers.size() - 1);
+        Node lastLayer = root;
         while (isLayerNonEmpty(lastLayer)) {
             boolean changed = false;
             Node nextLayer = makeInfinityPair();
@@ -61,15 +60,15 @@ public class IntSkipList implements SkipList<Integer> {
             lastInLayer.getRight().setDown(cur);  // Link right infinity
             cur.setPlateau(false);
             if (changed) {
-                layers.add(nextLayer);
+                root = nextLayer;
             }
-            lastLayer = layers.get(layers.size() - 1);
+            lastLayer = root;
         }
         createHashes(lastLayer);
     }
 
     private void insertToBottom(final int key) {
-        Node cur = layers.get(0);
+        Node cur = root;
         while (cur.right.getData() < key) {
             cur = cur.right;
         }
@@ -85,16 +84,9 @@ public class IntSkipList implements SkipList<Integer> {
         return beginning.right.getData() != Integer.MAX_VALUE;
     }
 
-    /**
-     * Searches key in {@link IntSkipList}
-     * WARNING: Do not use it in production - this is for functionality tests.
-     *
-     * @param key key for searching
-     * @return true is key is in skip list, false otherwise
-     */
-    @Override
+    // Public - for testing purposes only.
     public boolean find(Integer key) {
-        Node cur = layers.get(layers.size() - 1);
+        Node cur = root;
         while (true) {
             while (cur.right.getData() < key) {
                 cur = cur.right;
@@ -107,7 +99,7 @@ public class IntSkipList implements SkipList<Integer> {
     }
 
     /**
-     * Inserts key in {@link IntSkipList} and rehashes skip list
+     * Inserts key in {@link IntAuthDict} and rehashes skip list
      *
      * @param elem element for inserting
      */
@@ -116,7 +108,7 @@ public class IntSkipList implements SkipList<Integer> {
         if (find(elem)) {
             return;
         }
-        Node lastLayer = layers.get(layers.size() - 1);
+        Node lastLayer = root;
         List<Node> backtrack = new ArrayList<>();
         insertImpl(lastLayer, elem, backtrack);
         if (isLayerNonEmpty(lastLayer)) {
@@ -127,7 +119,7 @@ public class IntSkipList implements SkipList<Integer> {
             newLayer.right.setDown(lastLayer.getRight().getRight());
             doBacktracking(backtrack);
             recalcHash(newLayer);
-            layers.add(newLayer);
+            root = newLayer;
         } else {
             doBacktracking(backtrack);
         }
@@ -166,8 +158,7 @@ public class IntSkipList implements SkipList<Integer> {
     }
 
     /**
-     * Removes key in {@link IntSkipList}. If key is not in the skip list, nothing happens.
-     * TO BE IMPLEMENTED: Efficient hash recalculation
+     * Removes key in {@link IntAuthDict}. If key is not in the skip list, nothing happens.
      *
      * @param elem element for deleting
      */
@@ -176,7 +167,7 @@ public class IntSkipList implements SkipList<Integer> {
         if (!find(elem)) {
             return;
         }
-        Node cur = layers.get(layers.size() - 1);
+        Node cur = root;
         Deque<Node> backtrack = new ArrayDeque<>();
         while (true) {
             backtrack.push(cur);
@@ -208,9 +199,9 @@ public class IntSkipList implements SkipList<Integer> {
      * @param key key for proof generation
      * @return {@link Proof} for given key
      */
-    public Proof makeProof(final int key) {
+    public Proof makeProof(final Integer key) {
         List<Node> pList = new ArrayList<>();
-        Node cur = layers.get(layers.size() - 1);
+        Node cur = root;
         pList.add(cur);
         while (true) {
             while (cur.right.getData() <= key) {
@@ -278,13 +269,13 @@ public class IntSkipList implements SkipList<Integer> {
     }
 
     /**
-     * Creates most up-to-date confirmation of {@link IntSkipList}
+     * Creates most up-to-date confirmation of {@link IntAuthDict}
      *
      * @return {@link Confirmation} of given list
      */
     public Confirmation getConfirmation() {
         //return new Confirmation(createHashes(layers.get(layers.size() - 1)));
-        return new Confirmation(lastChangeTimestamp, layers.get(layers.size() - 1).getHash());
+        return new Confirmation(lastChangeTimestamp, root.getHash());
     }
 
     private byte[] createHashes(Node v) {
