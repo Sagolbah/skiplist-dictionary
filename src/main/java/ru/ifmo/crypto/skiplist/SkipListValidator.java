@@ -19,6 +19,9 @@ public class SkipListValidator implements Validator {
      */
     @Override
     public ValidationResult validate(Proof proof, Confirmation conf) {
+        if (proof.getTimestamp() < conf.getTimestamp()) {
+            return ValidationResult.OUTDATED;
+        }
         List<byte[]> seq = proof.getSequence();
         byte[] cur = CommutativeHashing.SHA256(seq.get(0), seq.get(1));
         for (int i = 2; i < seq.size(); i++) {

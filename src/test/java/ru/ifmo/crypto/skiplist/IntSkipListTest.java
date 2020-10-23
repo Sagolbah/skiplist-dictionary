@@ -220,7 +220,7 @@ public class IntSkipListTest {
         Proof pr2 = list.makeProof(4);
         assertEquals(ValidationResult.CORRECT, validator.validate(pr2, conf));
         // TODO: Change to OUTDATED
-        assertEquals(ValidationResult.WRONG, validator.validate(pr, conf));
+        assertEquals(ValidationResult.OUTDATED, validator.validate(pr, conf));
     }
 
     @Test
@@ -238,7 +238,7 @@ public class IntSkipListTest {
         Proof pr2 = list.makeProof(19);
         assertEquals(ValidationResult.CORRECT, validator.validate(pr2, conf));
         // TODO: Change to OUTDATED
-        assertEquals(ValidationResult.WRONG, validator.validate(pr, conf));
+        assertEquals(ValidationResult.OUTDATED, validator.validate(pr, conf));
     }
 
 

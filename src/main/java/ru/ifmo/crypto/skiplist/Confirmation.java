@@ -4,15 +4,15 @@ import java.util.Calendar;
 import java.util.List;
 
 public class Confirmation {
-    private final Calendar timestamp;
+    private final long timestamp;
     private final byte[] hash;
 
-    public Confirmation(byte[] hash) {
+    public Confirmation(long timestamp, byte[] hash) {
         this.hash = hash;
-        timestamp = Calendar.getInstance();
+        this.timestamp = timestamp;
     }
 
-    public Calendar getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 

@@ -1,6 +1,5 @@
 package ru.ifmo.crypto.skiplist;
 
-import java.util.Calendar;
 import java.util.List;
 
 /**
@@ -9,15 +8,15 @@ import java.util.List;
  * @author Daniil Boger (Sagolbah)
  */
 public class Proof {
-    private final Calendar timestamp;
+    private final long timestamp;
     private final List<byte[]> sequence;
 
-    public Proof(List<byte[]> sequence) {
-        timestamp = Calendar.getInstance();
+    public Proof(long timestamp, List<byte[]> sequence) {
+        this.timestamp = timestamp;
         this.sequence = sequence;
     }
 
-    public Calendar getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 

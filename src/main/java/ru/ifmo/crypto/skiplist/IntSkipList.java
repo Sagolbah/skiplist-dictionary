@@ -11,6 +11,7 @@ import java.util.*;
 public class IntSkipList implements SkipList<Integer> {
     private final Random rng = new Random();
     private static final byte[] NIL = new byte[]{};
+    private long lastChangeTimestamp = 0;
     private List<Node> layers;
 
     /**
@@ -130,6 +131,7 @@ public class IntSkipList implements SkipList<Integer> {
         } else {
             doBacktracking(backtrack);
         }
+        lastChangeTimestamp++;
     }
 
     private void doBacktracking(List<Node> backtrack) {
@@ -197,6 +199,7 @@ public class IntSkipList implements SkipList<Integer> {
             }
             recalcHash(nextNode);
         }
+        lastChangeTimestamp++;
     }
 
     /**
@@ -252,7 +255,7 @@ public class IntSkipList implements SkipList<Integer> {
                 }
             }
         }
-        return new Proof(qList);
+        return new Proof(lastChangeTimestamp, qList);
     }
 
     private void recalcHash(final Node v) {
@@ -283,7 +286,7 @@ public class IntSkipList implements SkipList<Integer> {
      */
     public Confirmation getConfirmation() {
         //return new Confirmation(createHashes(layers.get(layers.size() - 1)));
-        return new Confirmation(layers.get(layers.size() - 1).getHash());
+        return new Confirmation(lastChangeTimestamp, layers.get(layers.size() - 1).getHash());
     }
 
     private byte[] createHashes(Node v) {
