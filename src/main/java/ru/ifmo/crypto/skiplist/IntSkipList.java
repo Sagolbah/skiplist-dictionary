@@ -203,7 +203,7 @@ public class IntSkipList implements SkipList<Integer> {
     }
 
     /**
-     * Creates {@link Proof} for given key. If there is no such key, null is returned.
+     * Creates {@link Proof} for given key.
      *
      * @param key key for proof generation
      * @return {@link Proof} for given key
@@ -223,13 +223,11 @@ public class IntSkipList implements SkipList<Integer> {
             cur = cur.getDown();
             pList.add(cur);
         }
-        if (cur.getData() != key) {
-            return null;
-        }
         Collections.reverse(pList);
         List<byte[]> qList = new ArrayList<>();
         // Creating Q array with proof
         Node cur_w = pList.get(0).getRight();
+        boolean isPresent = cur.getData() == key;
         if (cur_w.isPlateau()) {
             qList.add(cur_w.getHash());
         } else {
@@ -255,7 +253,7 @@ public class IntSkipList implements SkipList<Integer> {
                 }
             }
         }
-        return new Proof(lastChangeTimestamp, qList);
+        return new Proof(key, lastChangeTimestamp, qList, isPresent);
     }
 
     private void recalcHash(final Node v) {

@@ -198,7 +198,7 @@ public class IntSkipListTest {
         SkipListValidator validator = new SkipListValidator();
         Proof pr = list.makeProof(5);
         list = new IntSkipList();
-        list.insert(666);
+        list.insert(5);
         list.insert(1337);
         list.insert(1349);
         Confirmation conf = list.getConfirmation();
@@ -219,7 +219,6 @@ public class IntSkipListTest {
         conf = list.getConfirmation();
         Proof pr2 = list.makeProof(4);
         assertEquals(ValidationResult.CORRECT, validator.validate(pr2, conf));
-        // TODO: Change to OUTDATED
         assertEquals(ValidationResult.OUTDATED, validator.validate(pr, conf));
     }
 
@@ -237,7 +236,6 @@ public class IntSkipListTest {
         conf = list.getConfirmation();
         Proof pr2 = list.makeProof(19);
         assertEquals(ValidationResult.CORRECT, validator.validate(pr2, conf));
-        // TODO: Change to OUTDATED
         assertEquals(ValidationResult.OUTDATED, validator.validate(pr, conf));
     }
 
@@ -281,6 +279,32 @@ public class IntSkipListTest {
             }
         }
     }
+
+    @Test
+    public void test17_emptyNonexist() {
+        list = new IntSkipList();
+        SkipListValidator validator = new SkipListValidator();
+        Proof pr = list.makeProof(1);
+        Confirmation conf = list.getConfirmation();
+        assertFalse(pr.isPresent());
+        assertEquals(ValidationResult.CORRECT, validator.validate(pr, conf));
+    }
+
+    @Test
+    public void test18_simpleNonExist() {
+        list = new IntSkipList();
+        list.insert(5);
+        list.insert(2);
+        list.insert(3);
+        list.insert(7);
+        SkipListValidator validator = new SkipListValidator();
+        Confirmation conf = list.getConfirmation();
+        assertEquals(ValidationResult.CORRECT, validator.validate(list.makeProof(-1349), conf));
+        assertEquals(ValidationResult.CORRECT, validator.validate(list.makeProof(4), conf));
+        assertEquals(ValidationResult.CORRECT, validator.validate(list.makeProof(2), conf));
+        assertEquals(ValidationResult.CORRECT, validator.validate(list.makeProof(6), conf));
+    }
+
 
     private <T> T getRandomElement(final Set<T> s) {
         return s.stream().skip(rng.nextInt(s.size())).findFirst().get();
