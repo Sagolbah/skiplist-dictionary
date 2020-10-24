@@ -33,10 +33,12 @@ public class IntAuthDictBigDataTest {
     @ParameterizedTest
     private void tests_BigData(int dataSize) {
         IntAuthDict list = new IntAuthDict(IntStream.range(0, dataSize).boxed().collect(Collectors.toList()));
-        Set<Integer> elements = new HashSet<>();
-        while (elements.size() < elementsSize) {
-            elements.add(rng.nextInt() % dataSize);
+        Set<Integer> elementsSet = new HashSet<>();
+        while (elementsSet.size() < elementsSize) {
+            elementsSet.add(rng.nextInt() % dataSize);
         }
+
+        List<Integer> elements = new ArrayList<>(elementsSet);
 
         long startTime;
         long endTime;
