@@ -13,7 +13,7 @@ public class Proof {
     private final int element;
     private final List<byte[]> sequence;
 
-    public Proof(int element, long timestamp, List<byte[]> sequence, boolean isPresent) {
+    Proof(int element, long timestamp, List<byte[]> sequence, boolean isPresent) {
         this.timestamp = timestamp;
         this.sequence = sequence;
         this.isPresent = isPresent;

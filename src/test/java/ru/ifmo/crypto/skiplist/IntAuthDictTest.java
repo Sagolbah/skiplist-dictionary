@@ -13,7 +13,6 @@ import static org.junit.Assert.*;
  */
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
 public class IntAuthDictTest {
-    private IntAuthDict list;
     private final Random rng = new Random();
     private final Validator validator = new SkipListValidator();
 
@@ -21,20 +20,20 @@ public class IntAuthDictTest {
 
     @Test
     public void test01_empty() {
-        list = new IntAuthDict();
+        IntAuthDict list = new IntAuthDict();
         assertFalse(list.find(666));
     }
 
     @Test
     public void test02_single() {
-        list = new IntAuthDict(List.of(5));
+        IntAuthDict list = new IntAuthDict(List.of(5));
         assertTrue(list.find(5));
         assertFalse(list.find(666));
     }
 
     @Test
     public void test03_multiple() {
-        list = new IntAuthDict(List.of(16, 5, 2, 8));
+        IntAuthDict list = new IntAuthDict(List.of(16, 5, 2, 8));
         assertFalse(list.find(0));
         assertFalse(list.find(7));
         assertFalse(list.find(1000));
@@ -44,16 +43,16 @@ public class IntAuthDictTest {
     }
 
     @Test
-    public void test04_searchRandomized() {
-        Set<Integer> arg = new HashSet<>();
+    public void test04_randomizedSearch() {
+        Set<Integer> elements = new HashSet<>();
         for (int i = 1; i <= 10000; i++) {
             if (rng.nextBoolean()) {
-                arg.add(i);
+                elements.add(i);
             }
         }
-        list = new IntAuthDict(new ArrayList<>(arg));
+        IntAuthDict list = new IntAuthDict(new ArrayList<>(elements));
         for (int i = 1; i <= 10000; i++) {
-            if (arg.contains(i)) {
+            if (elements.contains(i)) {
                 assertTrue(list.find(i));
             } else {
                 assertFalse(list.find(i));
@@ -63,7 +62,7 @@ public class IntAuthDictTest {
 
     @Test
     public void test05_basicInsertion() {
-        list = new IntAuthDict();
+        IntAuthDict list = new IntAuthDict();
         list.insert(2);
         list.insert(3);
         list.insert(5);
@@ -71,22 +70,21 @@ public class IntAuthDictTest {
         assertTrue(list.find(3));
         assertTrue(list.find(5));
         assertFalse(list.find(4));
-        list.makeProof(5);
     }
 
     @Test
     public void test06_randomizedInsertion() {
-        Set<Integer> arg = new HashSet<>();
-        list = new IntAuthDict(List.of(1));
-        arg.add(1);
+        Set<Integer> elements = new HashSet<>();
+        IntAuthDict list = new IntAuthDict(List.of(1));
+        elements.add(1);
         for (int i = 2; i <= 10000; i++) {
             if (rng.nextBoolean()) {
-                arg.add(i);
+                elements.add(i);
                 list.insert(i);
             }
         }
         for (int i = 1; i <= 10000; i++) {
-            if (arg.contains(i)) {
+            if (elements.contains(i)) {
                 assertTrue(list.find(i));
             } else {
                 assertFalse(list.find(i));
@@ -97,37 +95,39 @@ public class IntAuthDictTest {
 
     @Test
     public void test07_basicDeletion() {
-        list = new IntAuthDict();
+        IntAuthDict list = new IntAuthDict();
         list.insert(5);
         list.insert(2);
         list.insert(3);
+        assertTrue(list.find(3));
+
         list.delete(3);
         assertFalse(list.find(3));
     }
 
     @Test
     public void test08_allOperations() {
-        list = new IntAuthDict();
-        Set<Integer> correct = new HashSet<>();
+        IntAuthDict list = new IntAuthDict();
+        Set<Integer> elements = new HashSet<>();
         int queries = 0;
         for (int i = 0; i < 20000; i++) {
             int arg = rng.nextInt(Integer.MAX_VALUE);
             int op = rng.nextInt(3);
             switch (op) {
                 case 0:
-                    assertEquals(list.find(arg), correct.contains(arg));
+                    assertEquals(list.find(arg), elements.contains(arg));
                     queries++;
                     break;
                 case 1:
                     list.insert(arg);
-                    correct.add(arg);
+                    elements.add(arg);
                     break;
                 case 2:
-                    if (correct.isEmpty()) {
+                    if (elements.isEmpty()) {
                         continue;
                     }
-                    list.delete(correct.iterator().next());
-                    correct.remove(correct.iterator().next());
+                    list.delete(elements.iterator().next());
+                    elements.remove(elements.iterator().next());
                     break;
             }
         }
@@ -159,8 +159,8 @@ public class IntAuthDictTest {
     }
 
     @Test
-    public void test11_confirmInv() {
-        list = new IntAuthDict();
+    public void test11_validation() {
+        IntAuthDict list = new IntAuthDict();
         list.insert(5);
         list.insert(2);
         list.insert(3);
@@ -170,40 +170,24 @@ public class IntAuthDictTest {
     }
 
     @Test
-    public void test12_hardConfirmation() {
-        list = new IntAuthDict();
-        Set<Integer> arg = new HashSet<>();
-        for (int i = 1; i <= 3000; i++) {
-            if (rng.nextBoolean()) {
-                arg.add(i);
-                list.insert(i);
-            }
+    public void test12_hardValidation() {
+        IntAuthDict list = new IntAuthDict();
+        Set<Integer> elements = new HashSet<>();
+        for (int i = 1; i <= 10000; i++) {
+            int element = rng.nextInt();
+            elements.add(element);
+            list.insert(element);
         }
         Confirmation conf = list.getConfirmation();
-        for (Integer i : arg) {
+        for (Integer i : elements) {
             Proof pr = list.makeProof(i);
             assertEquals(ValidationResult.CORRECT, validator.validate(pr, conf));
         }
     }
 
     @Test
-    public void test13_fakeProof() {
-        list = new IntAuthDict();
-        list.insert(5);
-        list.insert(2);
-        list.insert(3);
-        Proof pr = list.makeProof(5);
-        list = new IntAuthDict();
-        list.insert(5);
-        list.insert(1337);
-        list.insert(1349);
-        Confirmation conf = list.getConfirmation();
-        assertEquals(ValidationResult.WRONG, validator.validate(pr, conf));
-    }
-
-    @Test
-    public void test14_hashingInsertions() {
-        list = new IntAuthDict();
+    public void test13_outdatedPostInsertValidation() {
+        IntAuthDict list = new IntAuthDict();
         list.insert(5);
         list.insert(2);
         list.insert(3);
@@ -218,8 +202,8 @@ public class IntAuthDictTest {
     }
 
     @Test
-    public void test15_hashingDeletions() {
-        list = new IntAuthDict();
+    public void test14_outdatedPostDeleteValidation() {
+        IntAuthDict list = new IntAuthDict();
         list.insert(666);
         list.insert(19);
         list.insert(28);
@@ -235,47 +219,8 @@ public class IntAuthDictTest {
 
 
     @Test
-    public void test16_allHashingOperations() {
-        list = new IntAuthDict();
-        Set<Integer> correct = new HashSet<>();
-        Proof pr;
-        Confirmation conf = list.getConfirmation();
-        for (int i = 0; i < 10000; i++) {
-            int op = rng.nextInt(4);
-            switch (op) {
-                case 0:
-                    if (correct.isEmpty()) {
-                        continue;
-                    }
-                    int arg = getRandomElement(correct);
-                    pr = list.makeProof(arg);
-                    assertEquals(ValidationResult.CORRECT, validator.validate(pr, conf));
-                    break;
-                case 1:
-                case 2:
-                    int newElem = rng.nextInt(Integer.MAX_VALUE);
-                    list.insert(newElem);
-                    correct.add(newElem);
-                    pr = list.makeProof(newElem);
-                    conf = list.getConfirmation();
-                    assertEquals(ValidationResult.CORRECT, validator.validate(pr, conf));
-                    break;
-                case 3:
-                    if (correct.isEmpty()) {
-                        continue;
-                    }
-                    int removedElem = getRandomElement(correct);
-                    list.delete(removedElem);
-                    correct.remove(removedElem);
-                    conf = list.getConfirmation();
-                    break;
-            }
-        }
-    }
-
-    @Test
-    public void test17_emptyNonexist() {
-        list = new IntAuthDict();
+    public void test15_emptyNonExist() {
+        IntAuthDict list = new IntAuthDict();
         Proof pr = list.makeProof(1);
         Confirmation conf = list.getConfirmation();
         assertFalse(pr.isPresent());
@@ -283,8 +228,8 @@ public class IntAuthDictTest {
     }
 
     @Test
-    public void test18_simpleNonExist() {
-        list = new IntAuthDict();
+    public void test16_simpleNonExist() {
+        IntAuthDict list = new IntAuthDict();
         list.insert(5);
         list.insert(2);
         list.insert(3);
@@ -294,8 +239,64 @@ public class IntAuthDictTest {
         assertEquals(ValidationResult.CORRECT, validator.validate(list.makeProof(4), conf));
         assertEquals(ValidationResult.CORRECT, validator.validate(list.makeProof(2), conf));
         assertEquals(ValidationResult.CORRECT, validator.validate(list.makeProof(6), conf));
+        assertEquals(ValidationResult.CORRECT, validator.validate(list.makeProof(0), conf));
     }
 
+    @Test
+    public void test17_postRandomOperationsValidation() {
+        IntAuthDict list = new IntAuthDict();
+        Set<Integer> elements = new HashSet<>();
+        Proof pr;
+        Confirmation conf = list.getConfirmation();
+        for (int i = 0; i < 10000; i++) {
+            int op = rng.nextInt(3);
+            switch (op) {
+                case 0:
+                    if (elements.isEmpty()) {
+                        continue;
+                    }
+                    int arg = getRandomElement(elements);
+                    pr = list.makeProof(arg);
+                    assertEquals(ValidationResult.CORRECT, validator.validate(pr, conf));
+                    break;
+                case 1:
+                    int newElem = rng.nextInt(Integer.MAX_VALUE);
+                    list.insert(newElem);
+                    elements.add(newElem);
+                    pr = list.makeProof(newElem);
+                    conf = list.getConfirmation();
+                    assertEquals(ValidationResult.CORRECT, validator.validate(pr, conf));
+                    break;
+                case 2:
+                    if (elements.isEmpty()) {
+                        continue;
+                    }
+                    int removedElem = getRandomElement(elements);
+                    list.delete(removedElem);
+                    elements.remove(removedElem);
+                    pr = list.makeProof(removedElem);
+                    conf = list.getConfirmation();
+                    assertEquals(ValidationResult.CORRECT, validator.validate(pr, conf));
+                    break;
+            }
+        }
+    }
+
+
+    @Test
+    public void test18_fakeProof() {
+        IntAuthDict list = new IntAuthDict();
+        list.insert(5);
+        list.insert(2);
+        list.insert(3);
+        Proof pr = list.makeProof(5);
+        list = new IntAuthDict();
+        list.insert(5);
+        list.insert(1337);
+        list.insert(1349);
+        Confirmation conf = list.getConfirmation();
+        assertEquals(ValidationResult.WRONG, validator.validate(pr, conf));
+    }
 
     private <T> T getRandomElement(final Set<T> s) {
         return s.stream().skip(rng.nextInt(s.size())).findFirst().get();
