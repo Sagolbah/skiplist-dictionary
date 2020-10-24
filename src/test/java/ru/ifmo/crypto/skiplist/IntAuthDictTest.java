@@ -15,6 +15,7 @@ import static org.junit.Assert.*;
 public class IntAuthDictTest {
     private IntAuthDict list;
     private final Random rng = new Random();
+    private final Validator validator = new SkipListValidator();
 
     // Functionality section (no cryptography tests)
 
@@ -165,7 +166,6 @@ public class IntAuthDictTest {
         list.insert(3);
         Confirmation conf = list.getConfirmation();
         Proof pr = list.makeProof(5);
-        SkipListValidator validator = new SkipListValidator();
         assertEquals(ValidationResult.CORRECT, validator.validate(pr, conf));
     }
 
@@ -179,7 +179,6 @@ public class IntAuthDictTest {
                 list.insert(i);
             }
         }
-        SkipListValidator validator = new SkipListValidator();
         Confirmation conf = list.getConfirmation();
         for (Integer i : arg) {
             Proof pr = list.makeProof(i);
@@ -193,7 +192,6 @@ public class IntAuthDictTest {
         list.insert(5);
         list.insert(2);
         list.insert(3);
-        SkipListValidator validator = new SkipListValidator();
         Proof pr = list.makeProof(5);
         list = new IntAuthDict();
         list.insert(5);
@@ -209,7 +207,6 @@ public class IntAuthDictTest {
         list.insert(5);
         list.insert(2);
         list.insert(3);
-        SkipListValidator validator = new SkipListValidator();
         Proof pr = list.makeProof(5);
         Confirmation conf = list.getConfirmation();
         assertEquals(ValidationResult.CORRECT, validator.validate(pr, conf));
@@ -226,7 +223,6 @@ public class IntAuthDictTest {
         list.insert(666);
         list.insert(19);
         list.insert(28);
-        SkipListValidator validator = new SkipListValidator();
         Proof pr = list.makeProof(28);
         Confirmation conf = list.getConfirmation();
         assertEquals(ValidationResult.CORRECT, validator.validate(pr, conf));
@@ -242,7 +238,6 @@ public class IntAuthDictTest {
     public void test16_allHashingOperations() {
         list = new IntAuthDict();
         Set<Integer> correct = new HashSet<>();
-        SkipListValidator validator = new SkipListValidator();
         Proof pr;
         Confirmation conf = list.getConfirmation();
         for (int i = 0; i < 10000; i++) {
@@ -281,7 +276,6 @@ public class IntAuthDictTest {
     @Test
     public void test17_emptyNonexist() {
         list = new IntAuthDict();
-        SkipListValidator validator = new SkipListValidator();
         Proof pr = list.makeProof(1);
         Confirmation conf = list.getConfirmation();
         assertFalse(pr.isPresent());
@@ -295,7 +289,6 @@ public class IntAuthDictTest {
         list.insert(2);
         list.insert(3);
         list.insert(7);
-        SkipListValidator validator = new SkipListValidator();
         Confirmation conf = list.getConfirmation();
         assertEquals(ValidationResult.CORRECT, validator.validate(list.makeProof(-1349), conf));
         assertEquals(ValidationResult.CORRECT, validator.validate(list.makeProof(4), conf));

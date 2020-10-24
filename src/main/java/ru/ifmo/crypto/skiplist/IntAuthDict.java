@@ -37,7 +37,7 @@ public class IntAuthDict implements AuthDict<Integer> {
     }
 
     private void build(final List<Integer> source) {
-        source.forEach(this::insertToBottom);
+        buildBottom(new ArrayList<>(source));
         Node lastLayer = root;
         while (isLayerNonEmpty(lastLayer)) {
             boolean changed = false;
@@ -53,6 +53,7 @@ public class IntAuthDict implements AuthDict<Integer> {
                     lastInLayer = lastInLayer.right;
                     cur.setPlateau(false);
                 } else {
+                    cur.setPlateau(true);
                     changed = true;
                 }
                 cur = cur.right;
@@ -65,6 +66,15 @@ public class IntAuthDict implements AuthDict<Integer> {
             lastLayer = root;
         }
         createHashes(lastLayer);
+    }
+
+    private void buildBottom(final List<Integer> source) {
+        Collections.sort(source);
+        Node cur = root;
+        for (int key : source) {
+            cur.right = new Node(key, cur.right, null);
+            cur = cur.right;
+        }
     }
 
     private void insertToBottom(final int key) {

@@ -1,8 +1,5 @@
 package ru.ifmo.crypto.skiplist;
 
-import java.util.Calendar;
-import java.util.List;
-
 public class Confirmation {
     private final long timestamp;
     private final byte[] hash;
