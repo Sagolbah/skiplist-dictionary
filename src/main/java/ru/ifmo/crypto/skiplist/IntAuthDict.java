@@ -45,8 +45,8 @@ public class IntAuthDict implements AuthDict<Integer> {
             lastLayer.setPlateau(false);
             nextLayer.setDown(lastLayer);  // Link left infinity
             Node lastInLayer = nextLayer;
-            Node cur = lastLayer.right;
-            while (cur.right != null) {
+            Node cur = lastLayer.getRight();
+            while (cur.getRight() != null) {
                 if (rng.nextBoolean()) {  // Keep alive
                     Node newNode = new Node(cur.getData(), lastInLayer.right, cur);
                     lastInLayer.setRight(newNode);
@@ -56,7 +56,7 @@ public class IntAuthDict implements AuthDict<Integer> {
                     cur.setPlateau(true);
                     changed = true;
                 }
-                cur = cur.right;
+                cur = cur.getRight();
             }
             lastInLayer.getRight().setDown(cur);  // Link right infinity
             cur.setPlateau(false);
@@ -72,18 +72,11 @@ public class IntAuthDict implements AuthDict<Integer> {
         Collections.sort(source);
         Node cur = root;
         for (int key : source) {
-            cur.right = new Node(key, cur.right, null);
-            cur = cur.right;
+            cur.setRight(new Node(key, cur.getRight(), null));
+            cur = cur.getRight();
         }
     }
 
-    private void insertToBottom(final int key) {
-        Node cur = root;
-        while (cur.right.getData() < key) {
-            cur = cur.right;
-        }
-        cur.right = new Node(key, cur.right, null);
-    }
 
     private Node makeInfinityPair() {
         Node rightSentinel = new Node(Integer.MAX_VALUE);
@@ -98,11 +91,11 @@ public class IntAuthDict implements AuthDict<Integer> {
     public boolean find(Integer key) {
         Node cur = root;
         while (true) {
-            while (cur.right.getData() < key) {
-                cur = cur.right;
+            while (cur.getRight().getData() < key) {
+                cur = cur.getRight();
             }
             if (cur.getDown() == null) {
-                return cur.right.getData() == key;
+                return cur.getRight().getData() == key;
             }
             cur = cur.getDown();
         }
@@ -126,7 +119,7 @@ public class IntAuthDict implements AuthDict<Integer> {
             lastLayer.setPlateau(false);
             lastLayer.getRight().getRight().setPlateau(false);
             newLayer.setDown(lastLayer);
-            newLayer.right.setDown(lastLayer.getRight().getRight());
+            newLayer.getRight().setDown(lastLayer.getRight().getRight());
             doBacktracking(backtrack);
             recalcHash(newLayer);
             root = newLayer;
@@ -150,7 +143,7 @@ public class IntAuthDict implements AuthDict<Integer> {
     private Node insertImpl(Node cur, int key, List<Node> backtrack) {
         backtrack.add(cur);
         while (cur.getRight().getData() < key) {
-            cur = cur.right;
+            cur = cur.getRight();
             backtrack.add(cur);
         }
         if (cur.getDown() == null) {
@@ -182,16 +175,16 @@ public class IntAuthDict implements AuthDict<Integer> {
         while (true) {
             backtrack.push(cur);
             while (cur.getRight().getData() < elem) {
-                cur = cur.right;
+                cur = cur.getRight();
                 backtrack.push(cur);
             }
-            if (cur.down == null) {
+            if (cur.getDown() == null) {
                 // Deleting cur.right
                 cur.setRight(cur.getRight().getRight());
                 recalcHash(cur);
                 break;
             }
-            cur = cur.down;
+            cur = cur.getDown();
         }
         while (!backtrack.isEmpty()) {
             Node nextNode = backtrack.pop();
@@ -214,8 +207,8 @@ public class IntAuthDict implements AuthDict<Integer> {
         Node cur = root;
         pList.add(cur);
         while (true) {
-            while (cur.right.getData() <= key) {
-                cur = cur.right;
+            while (cur.getRight().getData() <= key) {
+                cur = cur.getRight();
                 pList.add(cur);
             }
             if (cur.getDown() == null) {
