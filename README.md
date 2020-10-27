@@ -12,5 +12,5 @@ SHA-256 as the main hash function and modified it for commutativeness. See `Comm
 
 Authors:
 * Daniil Boger ([Sagolbah](https://github.com/Sagolbah)) - architecture, code, basic functionality test suite
-* Ravil Galiev ([Mr-Ravil](https://github.com/Mr-Ravil)) - advanced test suite and benchmarks
+* Ravil Galiev ([Mr-Ravil](https://github.com/Mr-Ravil)) - advanced test suite and benchmarks, debugging
 * Andrew Tsutsiev ([AT4-CGSG](https://github.com/AT4-CGSG)) - presentation, benchmarks
